@@ -4,14 +4,16 @@ import (
 	"fmt"
 	"os"
 
-	"vibrox-core/models"
+	"vibrox-core/internal/models"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
+// DB is the gorm DB interface
 var DB *gorm.DB
 
+// Connect creates a DB connection
 func Connect() {
 
 	host := os.Getenv("DB_HOST")
@@ -27,6 +29,9 @@ func Connect() {
 	if err != nil {
 		panic(err) //Panic is a built-in function that stops the ordinary flow of control and begins panicking.
 	}
-	db.AutoMigrate(&models.User{})
+	if err := db.AutoMigrate(&models.User{}); err != nil {
+		panic(err)
+	}
+
 	DB = db
 }

@@ -4,10 +4,11 @@ import (
 	"context"
 	"log"
 
-	"vibrox-core/config"
-	"vibrox-core/proto/logger"
+	"vibrox-core/internal/config"
+	"vibrox-core/internal/proto/logger"
 )
 
+// LogError is used to log error messages
 func LogError(ctx context.Context, message string) {
 
 	resp, err := config.LogClient.Log(ctx, &logger.LogRequest{
@@ -22,6 +23,7 @@ func LogError(ctx context.Context, message string) {
 	}
 }
 
+// LogInfo is used to log success messages
 func LogInfo(ctx context.Context, message string) {
 	resp, err := config.LogClient.Log(ctx, &logger.LogRequest{
 		Message: message,

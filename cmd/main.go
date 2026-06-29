@@ -4,8 +4,8 @@ import (
 	"log"
 	"time"
 
-	"vibrox-core/config"
-	"vibrox-core/routes"
+	"vibrox-core/internal/config"
+	"vibrox-core/internal/routes"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -34,10 +34,19 @@ func main() {
 	}
 
 	defer func() {
-		logClientConn.Close()
-		authClientConn.Close()
+		if err := logClientConn.Close(); err != nil {
+			log.Fatal("Failed to close log client:", err)
+		}
+	}()
+	defer func() {
+		if err = authClientConn.Close(); err != nil {
+			log.Fatal("Failed to close auth client:", err)
+		}
 	}()
 
 	routes.UserRoute(router)
-	router.Run()
+	if err := router.Run(); err != nil {
+		log.Fatal("Failed to start server:", err)
+	}
+
 }

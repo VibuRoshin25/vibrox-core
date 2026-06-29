@@ -3,13 +3,14 @@ package middleware
 import (
 	"net/http"
 
-	"vibrox-core/config"
-	"vibrox-core/logs"
-	"vibrox-core/proto/auth"
+	"vibrox-core/internal/config"
+	"vibrox-core/internal/logs"
+	"vibrox-core/internal/proto/auth"
 
 	"github.com/gin-gonic/gin"
 )
 
+// AuthMiddleware handles authentication and authorization
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		token := c.GetHeader("Authorization")

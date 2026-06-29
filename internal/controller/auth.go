@@ -1,19 +1,22 @@
 package controller
 
 import (
+	"errors"
 	"net/http"
 
-	"vibrox-core/config"
-	"vibrox-core/logs"
-	"vibrox-core/models"
-	"vibrox-core/payload"
-	"vibrox-core/proto/auth"
+	"vibrox-core/internal/config"
+	"vibrox-core/internal/logs"
+	"vibrox-core/internal/models"
+	"vibrox-core/internal/proto/auth"
 
 	"gorm.io/gorm"
+
+	"vibrox-core/internal/payload"
 
 	"github.com/gin-gonic/gin"
 )
 
+// SignUp user self sign up endpoint
 func SignUp(c *gin.Context) {
 	var req models.User
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -55,6 +58,7 @@ func SignUp(c *gin.Context) {
 	})
 }
 
+// SignIn user authentication endpoint
 func SignIn(c *gin.Context) {
 	var req payload.SignInPayload
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -73,7 +77,7 @@ func SignIn(c *gin.Context) {
 	// Check Email Password with DB
 	var user models.User
 	if err := config.DB.Where("email = ? AND password = ?", req.Email, req.Password).First(&user).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			logs.LogError(c, "Invalid email or password for email: "+req.Email)
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid email or password"})
 			return
@@ -85,7 +89,7 @@ func SignIn(c *gin.Context) {
 
 	authResp, err := config.AuthClient.GenerateToken(c, &auth.GenerateTokenRequest{
 		Email:  user.Email,
-		UserId: int64(user.ID),
+		UserId: user.ID,
 	})
 	if err != nil {
 		logs.LogError(c, "Failed to generate token: "+err.Error())

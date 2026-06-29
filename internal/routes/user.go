@@ -1,12 +1,13 @@
 package routes
 
 import (
-	"vibrox-core/controller"
-	"vibrox-core/middleware"
+	"vibrox-core/internal/controller"
+	"vibrox-core/internal/middleware"
 
 	"github.com/gin-gonic/gin"
 )
 
+// UserRoute contains all user routes
 func UserRoute(router *gin.Engine) {
 	router.GET("/health", controller.GetHealth)
 	router.GET("/users", middleware.AuthMiddleware(), controller.GetUsers)
