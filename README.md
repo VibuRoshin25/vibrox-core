@@ -18,7 +18,7 @@ It provides REST APIs for user operations and acts as a gRPC client to other ser
 
 ### Prerequisites
 
-- Go 1.24+
+- Go 1.26+
 - Docker (for local DB, etc.)
 - PostgreSQL
 
