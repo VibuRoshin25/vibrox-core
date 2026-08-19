@@ -2,7 +2,7 @@ package main
 
 import (
 	"log"
-	"time"
+	"os"
 
 	"vibrox-core/internal/config"
 	"vibrox-core/internal/routes"
@@ -12,41 +12,42 @@ import (
 )
 
 func main() {
-
 	if err := godotenv.Load(); err != nil {
-		log.Println("Error loading .env file")
+		log.Println("No .env file found; using environment variables")
 	}
+
+	loggerConnection, err := config.InitLoggerClient()
+	if err != nil {
+		log.Fatal("initialize logger client: ", err)
+	}
+	defer func() {
+		if err := loggerConnection.Close(); err != nil {
+			log.Printf("close logger client: %v", err)
+		}
+	}()
+	arenaConnection, err := config.InitArenaClient()
+	if err != nil {
+		log.Fatal("initialize arena client: ", err)
+	}
+	defer func() {
+		if err := arenaConnection.Close(); err != nil {
+			log.Printf("close arena client: %v", err)
+		}
+	}()
 
 	router := gin.New()
+	router.Use(gin.Logger(), gin.Recovery())
+	routes.Register(router)
 
-	time.Sleep(5 * time.Second)
-
-	config.Connect()
-
-	logClientConn, err := config.InitLoggerClient()
-	if err != nil {
-		log.Fatal("Failed to initialize logger client:", err)
+	address := ":" + envOrDefault("PORT", "8080")
+	if err := router.Run(address); err != nil {
+		log.Fatal("start server: ", err)
 	}
+}
 
-	authClientConn, err := config.InitAuthClient()
-	if err != nil {
-		log.Fatal("Failed to initialize auth client:", err)
+func envOrDefault(name, fallback string) string {
+	if value := os.Getenv(name); value != "" {
+		return value
 	}
-
-	defer func() {
-		if err := logClientConn.Close(); err != nil {
-			log.Fatal("Failed to close log client:", err)
-		}
-	}()
-	defer func() {
-		if err = authClientConn.Close(); err != nil {
-			log.Fatal("Failed to close auth client:", err)
-		}
-	}()
-
-	routes.UserRoute(router)
-	if err := router.Run(); err != nil {
-		log.Fatal("Failed to start server:", err)
-	}
-
+	return fallback
 }

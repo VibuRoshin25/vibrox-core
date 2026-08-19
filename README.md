@@ -1,33 +1,23 @@
 # vibrox-core
 
-`vibrox-core` is the user management microservice in the **Vibrox** suite.  
-It provides REST APIs for user operations and acts as a gRPC client to other services.
+`vibrox-core` is the public API gateway for the Vibrox Systems Lab. The web
+frontend reaches it through the `/api` reverse proxy, while experiment services
+use internal protocols such as gRPC behind it.
 
----
+The former user CRUD and custom authentication code was intentionally removed:
+the portfolio does not need user accounts, and retaining placeholder identity
+infrastructure would add complexity without demonstrating a real requirement.
 
-## ✨ Features
+## Current endpoint
 
-- User CRUD via REST APIs (Go + Gin)
-- gRPC client integration with:
-  - [`vibrox-auth`](https://github.com/VibuRoshin25/vibrox-auth) – authentication
-  - [`vibrox-echo`](https://github.com/VibuRoshin25/vibrox-echo) – centralized logging
-
----
-
-## 🚀 Getting Started
-
-### Prerequisites
-
-- Go 1.26+
-- Docker (for local DB, etc.)
-- PostgreSQL
-
-### Run Locally
-
-```bash
-git clone https://github.com/VibuRoshin25/vibrox-core.git
-cd vibrox-core
-
-go mod tidy
-go run main.go
+```text
+GET /health
 ```
+
+```text
+POST /arena/moves
+```
+
+The Arena endpoint translates browser JSON into an internal gRPC call.
+Authentication should use a maintained identity provider if a future experiment
+genuinely requires accounts.
